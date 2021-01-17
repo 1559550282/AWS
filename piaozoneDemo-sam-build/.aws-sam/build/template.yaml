@@ -1,0 +1,338 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Template for step-functions-workshop
+Resources:
+  ApplicationProcessingStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: ../../statemachine/fpzone.asl.json
+      DefinitionSubstitutions:
+        PushFP2H5Arn:
+          Fn::GetAtt:
+          - PushFP2H5Function
+          - Arn
+        storeTasktokenName:
+          Ref: storeTasktokenFunction
+        PushFP2ErpArn:
+          Fn::GetAtt:
+          - PushFP2ErpFunction
+          - Arn
+      Policies:
+      - LambdaInvokePolicy:
+          FunctionName:
+            Ref: PushFP2H5Function
+      - LambdaInvokePolicy:
+          FunctionName:
+            Ref: storeTasktokenFunction
+      - LambdaInvokePolicy:
+          FunctionName:
+            Ref: PushFP2ErpFunction
+  PushFP2H5Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Fn_PushFP2H5
+      CodeUri: PushFP2H5Function
+      Handler: Fn_PushFP2H5.lambda_handler
+      Runtime: python3.8
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ApplicationsTable
+      - Statement:
+        - Effect: Allow
+          Action:
+          - execute-api:ManageConnections
+          Resource:
+          - Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiwssH5connect}/*
+      Environment:
+        Variables:
+          H5_CONNECT_ENDPOINT:
+            Fn::Join:
+            - ''
+            - - https://
+              - Ref: apiwssH5connect
+              - .execute-api.
+              - Ref: AWS::Region
+              - .amazonaws.com/
+              - Ref: H5Stage
+  storeTasktokenFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Fn_storeTasktoken
+      CodeUri: storeTasktokenFunction
+      Handler: Fn_storeTasktoken.lambda_handler
+      Runtime: python3.6
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ApplicationsTable
+  PushFP2ErpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Fn_PushFP2Erp
+      CodeUri: PushFP2ErpFunction
+      Handler: Fn_PushFP2Erp.lambda_handler
+      Runtime: python3.6
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ApplicationsTable
+      - Statement:
+        - Effect: Allow
+          Action:
+          - execute-api:ManageConnections
+          Resource:
+          - Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiwssErpconnect}/*
+      Environment:
+        Variables:
+          ERP_CONNECT_ENDPOINT:
+            Fn::Join:
+            - ''
+            - - https://
+              - Ref: apiwssErpconnect
+              - .execute-api.
+              - Ref: AWS::Region
+              - .amazonaws.com/
+              - Ref: Stage
+  confirmFPFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Fn_confirmFP
+      CodeUri: confirmFPFunction
+      Handler: Fn_confirmFP.lambda_handler
+      Runtime: python3.6
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ApplicationsTable
+      - Statement:
+        - Sid: AllowCallbacksToStateMachinePolicy
+          Effect: Allow
+          Action:
+          - states:SendTaskSuccess
+          - states:SendTaskFailure
+          Resource:
+            Ref: ApplicationProcessingStateMachine
+      Events:
+        confirmFPAPI:
+          Type: HttpApi
+          Properties:
+            Path: /Fn_confirmFP
+            Method: ANY
+            ApiId:
+              Ref: httpAPIVoke
+  WXUploadFPFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Fn_WXUploadFP
+      CodeUri: WXUploadFPFunction
+      Handler: Fn_WXUploadFP.lambda_handler
+      Runtime: python3.6
+      Environment:
+        Variables:
+          APPLICATION_PROCESSING_STEP_FUNCTION_ARN:
+            Ref: ApplicationProcessingStateMachine
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ApplicationsTable
+      - StepFunctionsExecutionPolicy:
+          StateMachineName:
+            Fn::GetAtt:
+            - ApplicationProcessingStateMachine
+            - Name
+      Events:
+        WXUploadFPAPI:
+          Type: HttpApi
+          Properties:
+            Path: /Fn_WXUploadFP
+            Method: ANY
+            ApiId:
+              Ref: httpAPIVoke
+  httpAPIVoke:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: Prod
+  apiwssErpconnect:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: apiwssErpconnect
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: $request.body.action
+  SendRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId:
+        Ref: apiwssErpconnect
+      RouteKey: Userid
+      AuthorizationType: NONE
+      OperationName: SendRoute
+      Target:
+        Fn::Join:
+        - /
+        - - integrations
+          - Ref: SendInteg
+  SendInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId:
+        Ref: apiwssErpconnect
+      Description: Send Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${wssOnErpMsgFunction.Arn}/invocations
+  Deployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+    - SendRoute
+    Properties:
+      ApiId:
+        Ref: apiwssErpconnect
+  Stage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: Prod
+      Description: Prod Stage
+      DeploymentId:
+        Ref: Deployment
+      ApiId:
+        Ref: apiwssErpconnect
+  wssOnErpMsgFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: wssOnErpMsgFunction
+      Handler: Fn_wssOnErpMsg.lambda_handler
+      Runtime: python3.6
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ApplicationsTable
+      - Statement:
+        - Effect: Allow
+          Action:
+          - execute-api:ManageConnections
+          Resource:
+          - Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiwssErpconnect}/*
+  wssOnErpMsgPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+    - apiwssErpconnect
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: wssOnErpMsgFunction
+      Principal: apigateway.amazonaws.com
+  apiwssH5connect:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: apiwssH5connect
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: $request.body.action
+  H5SendRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId:
+        Ref: apiwssH5connect
+      RouteKey: Userid
+      AuthorizationType: NONE
+      OperationName: H5SendRoute
+      Target:
+        Fn::Join:
+        - /
+        - - integrations
+          - Ref: H5SendInteg
+  H5SendInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId:
+        Ref: apiwssH5connect
+      Description: H5 Send Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${wssOnH5MsgFunction.Arn}/invocations
+  H5Deployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+    - H5SendRoute
+    Properties:
+      ApiId:
+        Ref: apiwssH5connect
+  H5Stage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: Prod
+      Description: Prod Stage
+      DeploymentId:
+        Ref: H5Deployment
+      ApiId:
+        Ref: apiwssH5connect
+  wssOnH5MsgFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: wssOnH5MsgFunction
+      Handler: Fn_wssOnH5Msg.lambda_handler
+      Runtime: python3.6
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ApplicationsTable
+      - Statement:
+        - Effect: Allow
+          Action:
+          - execute-api:ManageConnections
+          Resource:
+          - Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiwssH5connect}/*
+  wssOnH5MsgPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+    - apiwssH5connect
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: wssOnH5MsgFunction
+      Principal: apigateway.amazonaws.com
+  ApplicationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: piaozone
+      AttributeDefinitions:
+      - AttributeName: userid
+        AttributeType: S
+      KeySchema:
+      - AttributeName: userid
+        KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+Outputs:
+  ERPWebSocketURI:
+    Description: The WSS Protocol URI for ERP connection
+    Value:
+      Fn::Join:
+      - ''
+      - - wss://
+        - Ref: apiwssErpconnect
+        - .execute-api.
+        - Ref: AWS::Region
+        - .amazonaws.com/
+        - Ref: Stage
+  H5WebSocketURI:
+    Description: The WSS Protocol URI for H5 connection
+    Value:
+      Fn::Join:
+      - ''
+      - - wss://
+        - Ref: apiwssH5connect
+        - .execute-api.
+        - Ref: AWS::Region
+        - .amazonaws.com/
+        - Ref: H5Stage
+  HttpURI:
+    Description: The Http Protocol URI for WXuploadFP & ConfirmFP
+    Value:
+      Fn::Join:
+      - ''
+      - - https://
+        - Ref: httpAPIVoke
+        - .execute-api.
+        - Ref: AWS::Region
+        - .amazonaws.com/
+        - Ref: Stage

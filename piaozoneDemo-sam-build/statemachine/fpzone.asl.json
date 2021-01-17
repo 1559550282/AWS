@@ -1,0 +1,58 @@
+{
+    "StartAt": "pushFP2h5",
+    "States": {
+        "pushFP2h5": {
+            "Type": "Task",
+            "Parameters": {
+                    "userid.$": "$.userid",
+                    "appid.$": "$.appid"
+            },
+            "Resource": "${PushFP2H5Arn}",
+            "ResultPath": "$.pushFP2h5",
+            "Next": "pendingConfirm"
+        },
+        "pendingConfirm": {
+           "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+            "Parameters": {
+                "FunctionName": "${storeTasktokenName}",
+                "Payload": {
+                    "userid.$":"$.userid",
+                    "id.$": "$.appid",
+                    "taskToken.$": "$$.Task.Token"
+                }
+            },
+            "ResultPath": "$.pendingConfirm",
+            "Next": "Confirm?"
+        },
+        "Confirm?": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.pendingConfirm.decision",
+                    "StringEquals": "APPROVE",
+                    "Next": "pushFP2Erp"
+                },
+                {
+                    "Variable": "$.pendingConfirm.decision",
+                    "StringEquals": "REJECT",
+                    "Next": "rejectFP2Erp"
+                }
+            ]
+        },
+        "pushFP2Erp": {
+            "Type": "Task",
+            "Parameters": {
+                    "userid.$": "$.userid",
+                    "FapiaoInfo.$": "$.FapiaoInfo"
+            },
+            "Resource": "${PushFP2ErpArn}",
+            "ResultPath": "$.pushFP2Erp",
+            "End": true
+        },
+        "rejectFP2Erp": {
+            "Type": "Pass",
+            "End": true
+        }
+    }
+}

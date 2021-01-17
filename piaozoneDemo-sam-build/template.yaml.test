@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  WXUploadFP: 
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: Fn_WXUploadFP.lambda_handler
+      Runtime: python3.6
+      Policies: AmazonDynamoDBFullAccess
+      Events:
+        WXUploadFPAPI:
+          Type: HttpApi
+          Properties:
+            Path: /Fn_WXUploadFP
+            Method: ANY
+            ApiId: !Ref httpAPIVoke
+
+  confirmFP:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: Fn_confirmFP.lambda_handler
+      Runtime: python3.6
+      Policies: AmazonDynamoDBFullAccess
+      Events:
+        confirmFPAPI:
+          Type: HttpApi
+          Properties:
+            Path: /Fn_confirmFP
+            Method: ANY
+            ApiId: !Ref httpAPIVoke 
+
+  httpAPIVoke:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: Prod
+      
