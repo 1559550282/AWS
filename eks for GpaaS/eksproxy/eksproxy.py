@@ -8,7 +8,7 @@ from kubernetes import client
 
 def get_bearer_token(cluster_id, region):
     STS_TOKEN_EXPIRES_IN = 60
-    session = boto3.session.Session(aws_access_key_id="AKIAUZIAJ42JHLWXX6PU", aws_secret_access_key="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")
+    session = boto3.session.Session(aws_access_key_id="Axxxxx", aws_secret_access_key="yixxxxxxxxxxxxxx")
 
     client = session.client('sts', region_name=region)
     service_id = client.meta.service_model.service_id
