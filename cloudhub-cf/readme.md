@@ -7,6 +7,7 @@
 ### 部署架构<br>
 <img src="https://github.com/1559550282/AWS/blob/main/cloudhub-cf/image/architecture.png" width="475" alt="架构图" /><br>
 ### 脚本说明<br>
+###### 参见：CreatevpcEC2.json <br>
 
 ### 实施效果<br>
 ###### 使用AMI + cloud formation 实现一键部署，通过指定CIDR和各主机IP地址，同时构建系统的所有组件。可以实现在10分钟内构建以往10天才可完成的部署工作，节省了大量人工。
