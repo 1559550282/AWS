@@ -9,9 +9,14 @@ xxx收票子模块无服务器改造</br>
 ###### 使用serverless改造，使用websockAPI替换原有的socketIO。ERP前端与之建立连接后，将connectID保存至dynamoDB；发票识别模块使用Lambda替换，完成识别后从DynamoDB获取connectID，可以直接向websocketAPI post消息，完成双向通讯<br>
 <img src="https://github.com/1559550282/AWS/blob/main/piaozoneDemo-sam-build/image/ServerlessIntro.png" width="675" alt="改造后" /><br>
 ###### 方案优势：<br>
-- <br>
-- <br>
-- <br>
+- 简化架构<br>
+  Lambda向Websocket API直接Post请求，摒弃RabbitMQ消息通知机制，大幅简化业务逻辑<br>
+- 提升稳定性<br>
+  全部采用托管服务，避免单点故障和集群扩展操作.APIGateway & Lambda支持自动扩展及高并发突增<br>
+- 简化运维<br>
+  托管serverless服务，自动扩展，无server运维投入<br>
+- 成本节省<br>
+  按照调用次数/连接总分钟数收费，无业务调用不收费，避免预制成本<br>
 ### 部署架构<br>
 <img src="https://github.com/1559550282/AWS/blob/main/piaozoneDemo-sam-build/image/architecture.png" width="775" alt="架构图" /><br>
 ### 代码说明<br>
