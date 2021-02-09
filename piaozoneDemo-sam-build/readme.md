@@ -28,5 +28,5 @@ xxx收票子模块无服务器改造</br>
 <img src="https://github.com/1559550282/AWS/blob/main/piaozoneDemo-sam-build/image/Stepfunction.png" width="675" alt="stepfunction" /><br>
 
 ### 效果展示<br>
-###### <a href="https://www.bilibili.com/video/BV1JV411b7mK/" title="收票子模块serverless改造"><img src="https://github.com/1559550282/AWS/blob/main/piaozoneDemo-sam-build/image/architecture.png" alt="Alternate Text" /></a>
+###### <a href="https://www.bilibili.com/video/BV1JV411b7mK/" title="收票子模块serverless改造"><img src="https://github.com/1559550282/AWS/blob/main/piaozoneDemo-sam-build/image/video.png" alt="Alternate Text" /></a>
 
