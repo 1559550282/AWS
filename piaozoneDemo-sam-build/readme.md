@@ -18,9 +18,13 @@ xxx收票子模块无服务器改造</br>
 - 成本节省<br>
   按照调用次数/连接总分钟数收费，无业务调用不收费，避免预制成本<br>
 ### 部署架构<br>
+ POC构架如下<br>
 <img src="https://github.com/1559550282/AWS/blob/main/piaozoneDemo-sam-build/image/architecture.png" width="775" alt="架构图" /><br>
 ### 代码说明<br>
-###### stepfunction
+- template.yaml:SAM部署脚本<br>
+- statemachine：Stepfunction状态机构造脚本，用于模拟移动端扫描发票，后端获取发票信息后将信息发送前端页面并等待人工确认的过程。
+- functions: Lambda函数实现过程
+  stepfunction的效果：
 <img src="https://github.com/1559550282/AWS/blob/main/piaozoneDemo-sam-build/image/Stepfunction.png" width="675" alt="stepfunction" /><br>
 
 ### 效果展示<br>
