@@ -7,7 +7,7 @@
 ###### AWS的cloudformation支持对计算资源、网络资源、安全的自动部署；AMI镜像可以将现有的基于EC2环境部署打包；从而可以提升客户试用环境、生产环境的部署效率。
 部署架构<br>
 -----------
-![](https://github.com/1559550282/AWS/blob/main/cloudhub-cf/image/architecture.png)
+<img src="https://github.com/1559550282/AWS/blob/main/cloudhub-cf/image/architecture.png" width="375" alt="架构图" />
 脚本说明
 ----------
 ###### 参见

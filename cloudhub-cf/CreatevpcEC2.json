@@ -8,7 +8,7 @@
       "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
     },
         "VPCName": {
-            "Description": "The name of the VPC being created.",
+            "Description": "YunZhiJia test VPC",
             "Type": "String",
             "Default": "VPC Public and Private with NAT"
         }
@@ -22,7 +22,7 @@
                 "CIDR": "10.0.0.0/24"
             },
             "Private0": {
-                "CIDR": "10.0.2.0/24"
+                "CIDR": "10.0.1.0/24"
             }
         },
         "AZRegions": {
@@ -498,8 +498,8 @@
         "nginx": {
           "Type": "AWS::EC2::Instance",
           "Properties": {
-            "ImageId" : "ami-05f3a83a160152613",
-            "InstanceType"   : "t2.small",
+            "ImageId" : "ami-003088de341da8256",
+            "InstanceType"   : "t3a.large",
             "KeyName"        : { "Ref" : "KeyName" },
             "NetworkInterfaces" : [{
               "AssociatePublicIpAddress" : "true",
@@ -507,7 +507,7 @@
               "DeleteOnTermination"      : "true",
               "SubnetId"                 : { "Ref" : "PublicSubnet0" },
               "GroupSet"                 : [ { "Ref" : "WebSecurityGroup" } ],
-              "PrivateIpAddress" : "10.0.0.246"
+              "PrivateIpAddress" : "10.0.0.138"
             }],
             "Tags":[{"Key": "Name", "Value": "nginx"}]
           }
@@ -515,8 +515,8 @@
         "privec2": {
           "Type": "AWS::EC2::Instance",
           "Properties": {
-            "ImageId" : "ami-05f3a83a160152613",
-            "InstanceType"   : "t2.small",
+            "ImageId" : "ami-09f9419a40defa2c9",
+            "InstanceType"   : "r5a.2xlarge",
             "KeyName"        : { "Ref" : "KeyName" },
             "NetworkInterfaces" : [{
               "AssociatePublicIpAddress" : "true",
@@ -524,7 +524,58 @@
               "DeleteOnTermination"      : "true",
               "SubnetId"                 : { "Ref" : "PrivateSubnet0" },
               "GroupSet"                 : [ { "Ref" : "InternalSecurityGroup" } ],
-              "PrivateIpAddress" : "10.0.2.24"
+              "PrivateIpAddress" : "10.0.1.146"
+            }],
+            "Tags":[{"Key": "Name", "Value": "privec2"}]
+          }
+	},
+		"privec3": {
+          "Type": "AWS::EC2::Instance",
+          "Properties": {
+            "ImageId" : "ami-09d828a0f6b9c6d0b",
+            "InstanceType"   : "r5a.2xlarge",
+            "KeyName"        : { "Ref" : "KeyName" },
+            "NetworkInterfaces" : [{
+              "AssociatePublicIpAddress" : "true",
+              "DeviceIndex"              : "0",
+              "DeleteOnTermination"      : "true",
+              "SubnetId"                 : { "Ref" : "PrivateSubnet0" },
+              "GroupSet"                 : [ { "Ref" : "InternalSecurityGroup" } ],
+              "PrivateIpAddress" : "10.0.1.193"
+            }],
+            "Tags":[{"Key": "Name", "Value": "privec2"}]
+          }
+    },
+		"privec4": {
+          "Type": "AWS::EC2::Instance",
+          "Properties": {
+            "ImageId" : "ami-026b976541344885e",
+            "InstanceType"   : "r5a.2xlarge",
+            "KeyName"        : { "Ref" : "KeyName" },
+            "NetworkInterfaces" : [{
+              "AssociatePublicIpAddress" : "true",
+              "DeviceIndex"              : "0",
+              "DeleteOnTermination"      : "true",
+              "SubnetId"                 : { "Ref" : "PrivateSubnet0" },
+              "GroupSet"                 : [ { "Ref" : "InternalSecurityGroup" } ],
+              "PrivateIpAddress" : "10.0.1.223"
+            }],
+            "Tags":[{"Key": "Name", "Value": "privec2"}]
+          }
+    },
+		"privec5": {
+          "Type": "AWS::EC2::Instance",
+          "Properties": {
+            "ImageId" : "ami-0c6d3002dd4325844",
+            "InstanceType"   : "r5a.2xlarge",
+            "KeyName"        : { "Ref" : "KeyName" },
+            "NetworkInterfaces" : [{
+              "AssociatePublicIpAddress" : "true",
+              "DeviceIndex"              : "0",
+              "DeleteOnTermination"      : "true",
+              "SubnetId"                 : { "Ref" : "PrivateSubnet0" },
+              "GroupSet"                 : [ { "Ref" : "InternalSecurityGroup" } ],
+              "PrivateIpAddress" : "10.0.1.40"
             }],
             "Tags":[{"Key": "Name", "Value": "privec2"}]
           }
