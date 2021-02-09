@@ -1,12 +1,17 @@
-发票云收票子模块无服务器改造</br>
+xxx收票子模块无服务器改造</br>
 ============================================
 ### 背景描述<br>
-###### 发票云收票子模块<br>
-###### 随着集团上云步伐的加速，云之家积极寻求无接触部署方案提升实施效率。金山云因不支持对挂载卷和启动盘构造完整虚拟机镜像，同时无一键部署功能，因此金山云上系统部署效率无法提升。
-###### AWS的cloudformation支持对计算资源、网络资源、安全的自动部署；AMI镜像可以将现有的基于EC2环境部署打包；从而可以提升客户试用环境、生产环境的部署效率。
+###### xxx收票子模块基于Springcloud构建，主要用于移动端发票上传，发票识别，ERP前端展示的处理流程。系统在高并发场景运行时偶尔发生宕机事件。<br>
+###### 采用AWS serverless改造，通过使用托管服务的原生功能可以简化系统架构，实现自动扩展，减少人工运维，提升系统稳定性的目标。<br>
 ### 改造前后架构对比<br>
+###### 原系统架构，采用ERP前端与socketIO建立websocket连接，实现发票信息推送； 采用RabbitMQ实现socketio与发票识别模块的进程间通信。为简化系统设计，一次报销过程对应一个RabbitMQ队列。RabbitMQ为单点部署，应用上尚未支持集群扩展。实际运行过程中，在高并发场景RabbitMQ队列超出上限，导致系统挂起<br>
 <img src="https://github.com/1559550282/AWS/blob/main/piaozoneDemo-sam-build/image/origin-issue.png" width="675" alt="改造前" /><br>
+###### 使用serverless改造，使用websockAPI替换原有的socketIO。ERP前端与之建立连接后，将connectID保存至dynamoDB；发票识别模块使用Lambda替换，完成识别后从DynamoDB获取connectID，可以直接向websocketAPI post消息，完成双向通讯<br>
 <img src="https://github.com/1559550282/AWS/blob/main/piaozoneDemo-sam-build/image/ServerlessIntro.png" width="675" alt="改造后" /><br>
+###### 方案优势：<br>
+- <br>
+- <br>
+- <br>
 ### 部署架构<br>
 <img src="https://github.com/1559550282/AWS/blob/main/piaozoneDemo-sam-build/image/architecture.png" width="775" alt="架构图" /><br>
 ### 代码说明<br>
