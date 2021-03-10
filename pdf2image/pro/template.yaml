@@ -1,0 +1,113 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  convert pdf to image lambda collection
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 300
+
+Resources:
+  #字体层资源
+  PDF2ImageFontLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: fonts-layer
+      ContentUri: ../fonts-layer.zip
+      CompatibleRuntimes:
+        - java8.al2
+      Description: Fonts Layer
+  #同步程序的入口
+  Pdf2imageSyncAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: pdf2image
+      StageName: Prod
+      BinaryMediaTypes:
+        - '*/*'
+      Tags:
+        Rest-Api:
+          pdf2image-sync
+      EndpointConfiguration: PRIVATE
+      Auth:
+        ResourcePolicy:
+          CustomStatements: # Supports Ref and Fn::If conditions, does not work with AWS::NoValue in policy statements
+            - Effect: Deny
+              Principal: '*'
+              Action: execute-api:Invoke
+              Resource: "execute-api:/Prod/POST/pdf2image"
+              Condition:
+                StringNotEquals:
+                  aws:sourceVpce: vpce-04baf2a8e131d4701
+
+            - Effect: Allow
+              Principal: '*'
+              Action: execute-api:Invoke
+              Resource: "execute-api:/Prod/POST/pdf2image"
+  #发票PDF源文件存储bucket
+  InvoicePdfStorage:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: invoice-pdf-storage-pro
+  #发票PDF快照存储bucket
+  InvoicePdfSnapshotStorage:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: invoice-pdf-snapshot-storage-pro
+
+
+  Pdf2imageFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: pdf2image-java
+      Runtime: java8.al2
+      MemorySize: 1024
+      CodeUri: ..
+      Handler: com.kingdee.pwy.pdf2image.handler.S3HandlerASync::handleRequest
+      Layers:
+        - Ref: PDF2ImageFontLayer
+      Policies:
+        - AmazonS3FullAccess
+      Tags:
+        Lambda-Function:
+          pdf2image
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket:
+              Ref: InvoicePdfStorage
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: ASYNC/
+                  - Name: suffix
+                    Value: .pdf
+
+
+  Pdf2imageSyncFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: pdf2image-java-sync
+      Runtime: java8.al2
+      MemorySize: 1024
+      CodeUri: ..
+      Handler: com.kingdee.pwy.pdf2image.handler.RestAPIHandlerSync::handleRequest
+      Layers:
+        - Ref: PDF2ImageFontLayer
+      Policies:
+        - AmazonS3FullAccess
+      Tags:
+        Lambda-Function:
+          pdf2image-sync
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /pdf2image
+            Method: POST
+            RestApiId:
+              Ref: Pdf2imageSyncAPI
