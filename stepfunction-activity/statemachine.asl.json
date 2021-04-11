@@ -1,0 +1,29 @@
+{
+  "Comment": "An example using a Task state.",
+  "StartAt": "ContentBrowsedAllowed?",
+  "Version": "1.0",
+  "TimeoutSeconds": 300,
+  "States":
+  {
+    "ContentBrowsedAllowed?": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:eu-west-1:955513527673:activity:ageCheck",
+      "Next": "Succeed",
+      "Catch": [
+        {
+          "ErrorEquals": [ "States.ALL" ],
+          "ResultPath": "$.error-info",
+          "Next": "Failure"
+        }
+      ]
+    },
+    "Failure": {
+      "Type": "Fail",
+      "Cause": "Invalid response.",
+      "Error": "CheckFailed"
+    },
+    "Succeed": {
+      "Type": "Succeed"
+    }
+  }
+}
