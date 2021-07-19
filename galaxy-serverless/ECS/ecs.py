@@ -12,7 +12,7 @@ print("Running with user: %s" % username)
 print("Running with password: %s" % password)
 print("Running with task token: %s" % tt)
 
-client = boto3.client('stepfunctions',aws_access_key_id="AKIAUZIAJ42JC6FSTZ6M",aws_secret_access_key="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")
+client = boto3.client('stepfunctions',aws_access_key_id="xxxxxxx",aws_secret_access_key="xxxxxxxxx")
 client.send_task_success(
         taskToken=tt,
         output=json.dumps({ "decision":"true"})
