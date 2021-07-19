@@ -1,0 +1,67 @@
+{
+    "StartAt": "ecsdemo",
+    "States": {
+        "ecsdemo": {
+            "Type": "Task",
+            "Resource": "arn:aws-cn:states:::ecs:runTask.waitForTaskToken",
+            "Parameters": {
+                "LaunchType": "FARGATE",
+                "Cluster": "arn:aws-cn:ecs:cn-north-1:329102517906:cluster/galaxy",
+                "TaskDefinition": "arn:aws-cn:ecs:cn-north-1:329102517906:task-definition/taskdemo:2",
+                "NetworkConfiguration": {
+                    "AwsvpcConfiguration": {
+                        "Subnets": ["subnet-5a4ebb2c"],
+                        "SecurityGroups": ["sg-d65ccbad"],
+                        "AssignPublicIp": "ENABLED"
+                    }
+                },
+                "Overrides": {
+                    "ContainerOverrides": [{
+                        "Name": "mypython",
+                        "Command": ["python3", "/code/ecs.py"],
+                        "Environment": [{
+                            "Name": "MY_PASS",
+                            "Value.$": "$.my_pass"
+                        }, {
+                            "Name": "MY_USER",
+                            "Value.$": "$.my_user"
+                        },{
+                          "Name":"MY_TASK_TOKEN",
+                          "Value.$":"$$.Task.Token"
+                        }]
+                    }]
+                }
+            },
+            "Retry": [{
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 3,
+                "MaxAttempts": 2,
+                "BackoffRate": 1.5
+            }],
+            "Next": "wait_for_process"
+        },
+      "wait_for_process": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.decision",
+                    "StringEquals": "true",
+                    "Next": "Succeed"
+                },
+                {
+                    "Variable": "$.decision",
+                    "StringEquals": "false",
+                    "Next": "Failure"
+                }
+            ]
+        },
+      "Failure": {
+      "Type": "Fail",
+      "Cause": "Invalid response.",
+      "Error": "CheckFailed"
+    },
+    "Succeed": {
+      "Type": "Succeed"
+    }
+    }
+}
