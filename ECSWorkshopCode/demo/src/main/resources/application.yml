@@ -1,0 +1,18 @@
+server:
+  port: 8010
+spring:
+  application:
+    name: provider
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka.copilot001.local:8761/eureka/
+
+  instance:
+    prefer-ip-address: true
