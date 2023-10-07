@@ -89,9 +89,7 @@ Here are the steps in details:
 1. Invoke Model with Request.
 
 ## 5. Output Video
-<a href="https://github.com/1559550282/AWS/assets/49836230/a53ad096-c224-4d90-9732-94a18e4c36d4">
-  <img src="https://i.vimeocdn.com/video/THUMBNAIL_ID.jpg" />
-</a>
+<a href="https://www.bilibili.com/video/BV14w411r72K?t=41.6" title="Stream Response demo"><img src="https://github.com/1559550282/AWS/blob/main/EMRClient/image/EMRClient.png" alt="Alternate Text" /></a>
 
 You can also check the video from the videos dir.
 
