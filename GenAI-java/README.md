@@ -91,9 +91,8 @@ Here are the steps in details:
 ## 5. Output Video
 
 
+https://github.com/1559550282/AWS/assets/49836230/a53ad096-c224-4d90-9732-94a18e4c36d4
 
-<video src="videos/InvokeModelWithResponseStream.mov" width="960" height="720" controls>
-  Video Tag Not Supported
-</video>
+You can also check the video from the videos dir.
 
 Congratulations! You now have a working Bedrock testbed.
