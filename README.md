@@ -1,7 +1,5 @@
 # Quick Start for Bedrock Java SDK with Claude Model
 
-## 1. Demo Summary
-
 This readme file describes the steps to quickly get started with Bedrock Java SDK for Claude in your AWS account. We assumed that the IAM role is created with the required Trust relationship and policies to access Bedrock. The Demo uses default IAM credential to access Bedrock.
 
 This repository contains mainly two files:
@@ -9,42 +7,6 @@ This repository contains mainly two files:
 - bedrockDemoStream.java: the file demonstrates the usage of invokeModelWithResponseStream with the Anthropic Claude model.
 
 The latest Bedrock Java SDK: [Link](https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/bedrockruntime/package-summary.html)
-
-## 2. Java SDK for Bedrock
-
- Java SDK supports  Bedrock since 2.20.162
-
-Pom.xml sample:
-
-```
-<properties>
-        ......
-        <aws.java.sdk.version>2.20.160</aws.java.sdk.version>
-        ......
-    </properties>
-```
-
-## 3. IAM Settings
-
-Create user with Bedrock accessing privileges:
-
-```
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "VisualEditor0",
-            "Effect": "Allow",
-            "Action": "bedrock:*",
-            "Resource": "*"
-        }
-    ]
-}
-```
-
-
-
-## 4. Code Details 
 
 Here are the steps in details:
 
@@ -88,13 +50,5 @@ Here are the steps in details:
 
 1. Invoke Model with Request.
 
-## 5. Output Video
-
-
-
-![Demo](imgs/InvokeModelWithResponseStream.gif){:height="2000px" width="3200px"}
-
-
 
 Congratulations! You now have a working Bedrock testbed.
-
