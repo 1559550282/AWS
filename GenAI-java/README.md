@@ -90,11 +90,16 @@ Here are the steps in details:
 
 ## 5. Output Video
 
+<a href="https://www.bilibili.com/video/BV14w411r72K/?t=41.1&vd_source=c959b3a726cc65bf153252d9748baa6f" title="StreamDemo"><img src="https://user-images.githubusercontent.com/49836230/273365213-e8ba7834-4dba-4782-b48c-496953b0b88a.png" alt="Alternate Text" /></a>
 
+<<<<<<< HEAD
 
 ![Demo](imgs/InvokeModelWithResponseStream.gif){:height="2000px" width="3200px"}
 
 
+=======
+You can also check the video from the videos dir.
+>>>>>>> 86558d10cc5bcdbc60bf562e6ffeb32084b99b4c
 
 Congratulations! You now have a working Bedrock testbed.
 
